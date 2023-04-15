@@ -3,12 +3,17 @@ import Head from 'next/head';
 import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 
+import { api } from '~/utils/api';
 const Home: NextPage = () => {
   const user = useUser();
+  // useEffect(() => {
+  //   console.log('user', user.isSignedIn);
+  // }, [user]);
 
+  const { data } = api.post.getAll.useQuery();
   useEffect(() => {
-    console.log('user', user.isSignedIn);
-  }, [user]);
+    console.log('data', data);
+  }, [data]);
 
   return (
     <>
@@ -22,6 +27,11 @@ const Home: NextPage = () => {
           <div>
             {!user.isSignedIn && <SignInButton />}
             {user.isSignedIn && <SignOutButton />}
+          </div>
+          <div>
+            {data?.map(({ id, content }) => {
+              return <span key={id}>{content}</span>;
+            })}
           </div>
         </div>
       </main>
