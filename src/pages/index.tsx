@@ -1,19 +1,56 @@
+import { type RouterOutputs, api } from '~/utils/api';
+
 import { type NextPage } from 'next';
 import Head from 'next/head';
-import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
-import { useEffect } from 'react';
+import Image from 'next/image';
 
-import { api } from '~/utils/api';
+import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
+
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
+
+const CreatePostWizard = () => {
+  const { user } = useUser();
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className='flex gap-3 w-full'>
+      <Image src={user?.profileImageUrl} alt='Profile Image' height={50} width={50} className='rounded-full' />
+      <input placeholder='Type some emojis' className='bg-transparent grow outline-none' />
+    </div>
+  );
+};
+
+type PostWithUser = RouterOutputs['post']['getAll'][number];
+const PostView = (props: PostWithUser) => {
+  const { post, author } = props;
+  return (
+    <div className='flex gap-3 w-full p-4 border-b border-slate-400'>
+      <Image src={author?.profileImageUrl || ''} alt='Profile Image' height={50} width={50} className='rounded-full' />
+      <div className='flex flex-col'>
+        <div className='flex gap-1 font-bold text-slate-300'>
+          <span>{`@ ${author.username || author.firstName || ''}`}</span>
+          <span className='font-thin'>{`• ${dayjs(post.createdAt).fromNow()}`}</span>
+        </div>
+        <span>{post.content}</span>
+      </div>
+    </div>
+  );
+};
+
 const Home: NextPage = () => {
   const user = useUser();
-  // useEffect(() => {
-  //   console.log('user', user.isSignedIn);
-  // }, [user]);
+  const { data, isLoading } = api.post.getAll.useQuery();
 
-  const { data } = api.post.getAll.useQuery();
-  useEffect(() => {
-    console.log('data', data);
-  }, [data]);
+  if (isLoading) {
+    return <div>data Loading</div>;
+  }
+  if (!data) {
+    return <div>no data</div>;
+  }
 
   return (
     <>
@@ -22,15 +59,18 @@ const Home: NextPage = () => {
         <meta name='description' content='Twatteneers!' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <main className='flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]'>
-        <div className='container flex flex-col items-center justify-center gap-12 px-4 py-16 '>
+      <main className='flex justify-center h-screen'>
+        <div className='w-full md:max-w-2xl border-x border-slate-400'>
           <div>
             {!user.isSignedIn && <SignInButton />}
             {user.isSignedIn && <SignOutButton />}
           </div>
-          <div>
-            {data?.map(({ id, content }) => {
-              return <span key={id}>{content}</span>;
+          <div className='border-b border-slate-400 p-4 flex gap-2'>
+            <CreatePostWizard />
+          </div>
+          <div className='flex flex-col'>
+            {data.map((fullpost) => {
+              return <PostView key={fullpost.post.id} {...fullpost} />;
             })}
           </div>
         </div>
@@ -40,40 +80,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-// import Link from 'next/link';
-// import { api } from '~/utils/api';
-
-{
-  /* 
-    const hello = api.example.hello.useQuery({ text: 'from tRPC' });
-
-  <h1 className='text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]'>
-            Create <span className='text-[hsl(280,100%,70%)]'>T3</span> App
-          </h1> */
-}
-{
-  /* <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8'>
-            <Link
-              className='flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20'
-              href='https://create.t3.gg/en/usage/first-steps'
-              target='_blank'
-            >
-              <h3 className='text-2xl font-bold'>First Steps →</h3>
-              <div className='text-lg'>
-                Just the basics - Everything you need to know to set up your database and authentication.
-              </div>
-            </Link>
-            <Link
-              className='flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20'
-              href='https://create.t3.gg/en/introduction'
-              target='_blank'
-            >
-              <h3 className='text-2xl font-bold'>Documentation →</h3>
-              <div className='text-lg'>
-                Learn more about Create T3 App, the libraries it uses, and how to deploy it.
-              </div>
-            </Link>
-          </div>
-          <p className='text-2xl text-white'>{hello.data ? hello.data.greeting : 'Loading tRPC query...'}</p> */
-}

@@ -8,16 +8,5 @@
   "arrowParens": "always",
   "jsxSingleQuote": true,
   "semi": true,
-  "importOrder": [
-    "^(preact/(.*)$)|^(preact$)",
-    "<THIRD_PARTY_MODULES>",
-    "",
-    "^@iidentifii/(.*)$",
-    "",
-    "^~/utils/(.*)$",
-    "^~/components/(.*)$",
-    "^~/styles/(.*)$",
-    "^~/(.*)$",
-    "^[./]"
-  ]
+  "importOrder": ["^(react/(.*)$)|^(react$)", "^(next/(.*)$)|^(next$)", "<THIRD_PARTY_MODULES>", ""]
 }
