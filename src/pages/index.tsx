@@ -13,6 +13,7 @@ import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
 dayjs.extend(relativeTime);
 
@@ -81,8 +82,12 @@ const PostView = (props: PostWithUser) => {
       <Image src={author?.profileImageUrl || ''} alt='Profile Image' height={50} width={50} className='rounded-full' />
       <div className='flex flex-col'>
         <div className='flex gap-1 font-bold text-slate-300'>
-          <span>{`@ ${author.username || author.firstName || ''}`}</span>
-          <span className='font-thin'>{`• ${dayjs(post.createdAt).fromNow()}`}</span>
+          <Link href={`/@${author.firstName || ''}`}>
+            <span>{`@ ${author.username || author.firstName || ''}`}</span>
+          </Link>
+          <Link href={`/post/${post.id}`}>
+            <span className='font-thin'>{`• ${dayjs(post.createdAt).fromNow()}`}</span>
+          </Link>
         </div>
         <span className='text-xl'>{post.content}</span>
       </div>
