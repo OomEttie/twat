@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { type RouterOutputs, api } from '~/utils/api';
 
-import { LoadingPage } from '~/components/loading';
+import { LoadingPage, LoadingSpinner } from '~/components/loading';
 
 import { type NextPage } from 'next';
 import Head from 'next/head';
@@ -12,6 +12,7 @@ import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { toast } from 'react-hot-toast';
 
 dayjs.extend(relativeTime);
 
@@ -29,6 +30,19 @@ const CreatePostWizard = () => {
       setInput('');
       void ctx.post.getAll.invalidate();
     },
+    onError: (e) => {
+      if (e.data?.zodError) {
+        const errorMessage = e.data?.zodError?.fieldErrors.content;
+        if (errorMessage && errorMessage[0]) {
+          toast.error(errorMessage[0]);
+          return;
+        }
+      } else if (e.message) {
+        toast.error(e.message);
+        return;
+      }
+      toast.error('failed to post');
+    },
   });
 
   return (
@@ -40,8 +54,21 @@ const CreatePostWizard = () => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
+        onKeyDown={(e) => {
+          if (e.key == 'Enter') {
+            e.preventDefault();
+            if (input !== '') {
+              mutate({ content: input });
+            }
+          }
+        }}
       />
-      <button onClick={() => mutate({ content: input })}>post</button>
+      {input != '' && !isPosting && <button onClick={() => mutate({ content: input })}>post</button>}
+      {isPosting && (
+        <div className='flex'>
+          <LoadingSpinner size={40} />
+        </div>
+      )}
     </div>
   );
 };
