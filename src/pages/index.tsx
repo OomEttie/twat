@@ -1,15 +1,9 @@
 import { useState } from 'react';
-
 import { type RouterOutputs, api } from '~/utils/api';
-
 import { LoadingPage, LoadingSpinner } from '~/components/loading';
-
 import { type NextPage } from 'next';
-import Head from 'next/head';
 import Image from 'next/image';
-
 import { SignInButton, SignOutButton, useUser } from '@clerk/clerk-react';
-
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { toast } from 'react-hot-toast';
@@ -48,7 +42,13 @@ const CreatePostWizard = () => {
 
   return (
     <div className='flex gap-3 w-full'>
-      <Image src={user?.profileImageUrl} alt='Profile Image' height={50} width={50} className='rounded-full' />
+      <Image
+        src={user?.profileImageUrl}
+        alt='Profile Image'
+        height={50}
+        width={50}
+        className='rounded-full'
+      />
       <input
         placeholder='Type some emojis'
         className='bg-transparent grow outline-none'
@@ -64,7 +64,9 @@ const CreatePostWizard = () => {
           }
         }}
       />
-      {input != '' && !isPosting && <button onClick={() => mutate({ content: input })}>post</button>}
+      {input != '' && !isPosting && (
+        <button onClick={() => mutate({ content: input })}>post</button>
+      )}
       {isPosting && (
         <div className='flex'>
           <LoadingSpinner size={40} />
@@ -79,14 +81,22 @@ const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
     <div className='flex gap-3 w-full p-4 border-b border-slate-400'>
-      <Image src={author?.profileImageUrl || ''} alt='Profile Image' height={50} width={50} className='rounded-full' />
+      <Image
+        src={author?.profileImageUrl || ''}
+        alt='Profile Image'
+        height={50}
+        width={50}
+        className='rounded-full'
+      />
       <div className='flex flex-col'>
         <div className='flex gap-1 font-bold text-slate-300'>
           <Link href={`/@${author.firstName || ''}`}>
             <span>{`@ ${author.username || author.firstName || ''}`}</span>
           </Link>
           <Link href={`/post/${post.id}`}>
-            <span className='font-thin'>{`• ${dayjs(post.createdAt).fromNow()}`}</span>
+            <span className='font-thin'>{`• ${dayjs(
+              post.createdAt,
+            ).fromNow()}`}</span>
           </Link>
         </div>
         <span className='text-xl'>{post.content}</span>
@@ -111,7 +121,7 @@ const Feed = () => {
   );
 };
 
-const Home: NextPage = () => {
+const Twat: NextPage = () => {
   const { isLoaded: userLoaded, isSignedIn: userIsSignedIn } = useUser();
   api.post.getAll.useQuery();
 
@@ -120,18 +130,15 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <Head>
-        <title>twat101</title>
-        <meta name='description' content='Twatteneers!' />
-        <link rel='icon' href='/favicon.ico' />
-      </Head>
       <main className='flex justify-center h-screen'>
         <div className='w-full md:max-w-2xl border-x border-slate-400'>
           <div className='flex justify-center'>
             {!userIsSignedIn && <SignInButton />}
             {userIsSignedIn && <SignOutButton />}
           </div>
-          <div className='border-b border-slate-400 p-4 flex gap-2'>{userIsSignedIn && <CreatePostWizard />}</div>
+          <div className='border-b border-slate-400 p-4 flex gap-2'>
+            {userIsSignedIn && <CreatePostWizard />}
+          </div>
           <Feed />
         </div>
       </main>
@@ -139,4 +146,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Twat;

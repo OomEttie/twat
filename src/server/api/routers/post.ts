@@ -5,11 +5,12 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure, publicProcedure } from '~/server/api/trpc';
-
-const filterUserForClient = (user: User) => {
-  return { id: user.id, username: user.username, firstName: user.firstName, profileImageUrl: user.profileImageUrl };
-};
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from '~/server/api/trpc';
+import { filterUserForClient } from '~/server/helpers/filterUserForClient';
 
 // Create a new ratelimiter, that allows 1 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -43,7 +44,10 @@ export const postRouter = createTRPCRouter({
     return posts.map((post) => {
       const author = users.find((user) => user.id == post.authorId);
       if (!author) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Author for post not found' });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Author for post not found',
+        });
       }
 
       return { post, author };
